@@ -2,11 +2,12 @@ package com.anand.demo;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -47,7 +48,7 @@ public class SpringBootAmqpDemoApplicationTests {
 	@Test
 	public void throwExceptionInCpmMessageProcessing() {
 		
-		BDDMockito.given(cpmMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
+		given(cpmMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
 
 		amqpTemplate.convertAndSend(rabbitmqProperties.getExchange().get("cpm-cd-exchange").getName(), 
 				rabbitmqProperties.getBinding().get("cpm-cd-binding").getRoutingKey(), deal);
@@ -62,9 +63,9 @@ public class SpringBootAmqpDemoApplicationTests {
 	@Test
 	public void throwExceptionInPilMessageProcessing() {
 		
-		BDDMockito.when(cpmMessageService.processMessage(deal)).thenReturn(deal);
+		when(cpmMessageService.processMessage(deal)).thenReturn(deal);
 
-		BDDMockito.given(pilMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
+		given(pilMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
 
 		amqpTemplate.convertAndSend(rabbitmqProperties.getExchange().get("cpm-cd-exchange").getName(), 
 				rabbitmqProperties.getBinding().get("cpm-cd-binding").getRoutingKey(), deal);
@@ -79,9 +80,9 @@ public class SpringBootAmqpDemoApplicationTests {
 	@Test
 	public void positiveFlow() {
 		
-		BDDMockito.when(cpmMessageService.processMessage(deal)).thenReturn(deal);
+		when(cpmMessageService.processMessage(deal)).thenReturn(deal);
 
-		BDDMockito.when(pilMessageService.processMessage(deal)).thenAnswer(new Answer<Deal>() {
+		when(pilMessageService.processMessage(deal)).thenAnswer(new Answer<Deal>() {
 			@Override
 			public Deal answer(InvocationOnMock invocation) throws Throwable {
 				Deal deal = invocation.getArgumentAt(0, Deal.class);
