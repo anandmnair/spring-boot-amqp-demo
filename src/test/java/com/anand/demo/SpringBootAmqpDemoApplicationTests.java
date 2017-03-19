@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -44,8 +43,39 @@ public class SpringBootAmqpDemoApplicationTests {
 	public void setup() {
 		deal=Deal.builder().dealId(101L).dealCode("DC101").build();
 	}
+	
+	@Test
+	public void throwExceptionInCpmMessageProcessing() {
+		
+		BDDMockito.given(cpmMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
 
-	@Ignore
+		amqpTemplate.convertAndSend(rabbitmqProperties.getExchange().get("cpm-cd-exchange").getName(), 
+				rabbitmqProperties.getBinding().get("cpm-cd-binding").getRoutingKey(), deal);
+		
+		Deal result = (Deal) amqpTemplate.receiveAndConvert(rabbitmqProperties.getQueue().get("cpm-cd-queue").getName()+rabbitmqProperties.getDeadLetterQueuePostfix(), 10000L);
+		
+		assertThat(result, equalTo(deal));
+				
+	}
+	
+
+	@Test
+	public void throwExceptionInPilMessageProcessing() {
+		
+		BDDMockito.when(cpmMessageService.processMessage(deal)).thenReturn(deal);
+
+		BDDMockito.given(pilMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
+
+		amqpTemplate.convertAndSend(rabbitmqProperties.getExchange().get("cpm-cd-exchange").getName(), 
+				rabbitmqProperties.getBinding().get("cpm-cd-binding").getRoutingKey(), deal);
+		
+		Deal result = (Deal) amqpTemplate.receiveAndConvert(rabbitmqProperties.getQueue().get("pil-deal-queue").getName()+rabbitmqProperties.getDeadLetterQueuePostfix(), 10000L);
+
+		
+		assertThat(result, equalTo(deal));
+				
+	}
+	
 	@Test
 	public void positiveFlow() {
 		
@@ -71,22 +101,6 @@ public class SpringBootAmqpDemoApplicationTests {
 				
 	}
 	
-	
-	@Test
-	public void throwExceptionInCpmMessageProcessing() {
-		
-		BDDMockito.given(cpmMessageService.processMessage(deal)).willThrow(new RuntimeException("Some dummy exception in test case"));
-
-		amqpTemplate.convertAndSend(rabbitmqProperties.getExchange().get("cpm-cd-exchange").getName(), 
-				rabbitmqProperties.getBinding().get("cpm-cd-binding").getRoutingKey(), deal);
-		
-		Deal result = (Deal) amqpTemplate.receiveAndConvert(rabbitmqProperties.getQueue().get("pil-deal-mock-queue").getName(), 
-				10000L);
-		//Deal result = (Deal) amqpTemplate.receiveAndConvert(rabbitmqProperties.getQueue().get("cpm-cd-queue").getName()+rabbitmqProperties.getDeadLetterQueuePostfix(), 10000L);
-		
-		//assertThat(result, equalTo(deal));
-				
-	}
 	
 }
 

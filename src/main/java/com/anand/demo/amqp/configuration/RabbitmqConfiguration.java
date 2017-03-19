@@ -3,15 +3,12 @@ package com.anand.demo.amqp.configuration;
 import java.util.Map;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.ExchangeBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
-import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.BeanUtils;
@@ -22,7 +19,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import com.anand.demo.amqp.properties.BindingProperties;
 import com.anand.demo.amqp.properties.ExchangeProperties;
@@ -37,22 +33,11 @@ public class RabbitmqConfiguration implements ApplicationContextAware {
 	
 	private AnnotationConfigApplicationContext applicationContext;
 	
-	@Autowired
-	private AmqpTemplate amqpTemplate;
-	
 	@Bean
 	public MessageConverter messageConverter() {
 		return new Jackson2JsonMessageConverter();
 	}
 
-	@Bean
-	public RetryOperationsInterceptor interceptor() {
-		return RetryInterceptorBuilder.stateless()
-				.maxAttempts(5)
-				.recoverer(new RepublishMessageRecoverer(amqpTemplate, "${rabbitmq.config.exchange.global-err-exchange.name}", "${rabbitmq.config.queue.global-err-queue.name}"))
-				.build();
-	}
-	
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext= (AnnotationConfigApplicationContext) applicationContext;

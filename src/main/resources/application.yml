@@ -7,59 +7,48 @@ spring:
     listener:
       default-requeue-rejected: false
       acknowledge-mode: auto
-#      retry:
-#        enabled: true
-    
+      retry: 
+        enabled: true
 
 rabbitmq: 
   config:
     default-dead-letter-exchange-properties: 
       auto-delete: true
       durable: false
-    dead-letter-exchange-postfix: .Deal.Letter.Exchange  
-    dead-letter-queue-postfix: .Dead.Letter.Queue  
+    dead-letter-exchange-postfix: .dlx  
+    dead-letter-queue-postfix: .dlq 
     exchange: 
       cpm-cd-exchange: 
         name: cpm.cd.exchange-${user.name}
         type: direct
-        durable: true
-        auto-delete: false
+        durable: false
+        auto-delete: true
       pil-deal-exchange: 
         name: pil.deal.exchange-${user.name}
         type: direct
-        durable: true
-        auto-delete: false 
+        durable: false
+        auto-delete: true 
       pil-deal-mock-exchange:
         name: pil.deal.mock.exchange-${user.name}
         type: direct
-        durable: true
-        auto-delete: false     
-      global-err-exchange:
-        name: global.err.exchange-${user.name}
-        type: topic
-        durable: true
-        auto-delete: false
-          
-    queue:
+        durable: false
+        auto-delete: true     
+    queue: 
       cpm-cd-queue: 
         name: cpm.cd.queue-${user.name}
-        durable: true
-        auto-delete: false
-        dead-letter-enabled: false
+        durable: false
+        auto-delete: true
+        dead-letter-enabled: true
       pil-deal-queue: 
         name: pil.deal.queue-${user.name}
-        durable: true
-        auto-delete: false
-        dead-letter-enabled: false  
+        durable: false
+        auto-delete: true
+        dead-letter-enabled: true  
       pil-deal-mock-queue: 
         name: pil.deal.mock.queue-${user.name}
-        durable: true
-        auto-delete: false
+        durable: false
+        auto-delete: true
         dead-letter-enabled: false   
-      global-err-queue:
-        name: global.err.queue-${user.name} 
-        durable: true
-        auto-delete: false
     binding: 
       cpm-cd-binding: 
         exchange: cpm-cd-exchange
@@ -73,9 +62,5 @@ rabbitmq:
         exchange: pil-deal-mock-exchange
         queue: pil-deal-mock-queue
         routing-key: pil.deal.mock.rkey        
-      global-err-binding:
-        exchange: global-err-exchange
-        queue: global-err-queue 
-        routing-key: global.err.rkey     
         
       
