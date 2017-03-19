@@ -1,3 +1,3 @@
 # spring-boot-amqp-demo
 
-A demo project to descrobe the usage of spring amqp with rabbitmq messaging
+A demo project to describe the usage of spring amqp with rabbitmq messaging
